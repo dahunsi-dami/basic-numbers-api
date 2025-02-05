@@ -1,0 +1,8 @@
+**/__pyacache__/**
+**/env/**
+env
+**/env
+.env
+**/.env
+**/.env/**
+.vercel
