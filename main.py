@@ -47,7 +47,12 @@ def yuh_perfect(n: int) -> bool:
     """ Mi a go tell yuh if yuh number perfect, undastan? """
     if n < 2:
         return False
-    divisors = [i for i in range(1, n) if n % i == 0]
+    divisors = [1]
+    for i in range(2, int(math.isqrt(n)) + 1):
+        if n % i == 0:
+            divisors.append(i)
+            if i != n // i:
+                divisors.append(n // i)
     return sum(divisors) == n
 
 
