@@ -33,8 +33,12 @@ def optimus_prime(n: int) -> bool:
     """ I'll tell if a number is a prime, dear sentient being. """
     if n < 2:
         return False
-    for i in range(2, int(n**0.5) + 1):
-        if n % i == 0:
+    if n in (2, 3):
+        return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+    for i in range(5, int(math.isqrt(n)) + 1, 6):
+        if n % i == 0 or n % (i + 2) == 0:
             return False
     return True
 
