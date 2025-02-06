@@ -90,7 +90,7 @@ async def classify_number(number: str = Query(
     description="The number to classify"
 )):
     try:
-        if not number.lstrip('-').isdigit():
+        if not number.isdigit():
             raise ValueError("Invalid input. Provide valid integer.")
 
         number_int = int(number)
