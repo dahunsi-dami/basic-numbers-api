@@ -7,7 +7,11 @@ math properties about numbers all day. :)
 from fastapi import FastAPI, Query, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import requests
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi_cache.decorator import cache
+import httpx
+import math
 
 
 app = FastAPI()
@@ -18,6 +22,11 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def startup():
+    FastAPICache.init(InMemoryBackend())
 
 
 def optimus_prime(n: int) -> bool:
@@ -50,20 +59,23 @@ def digit_sum(n: int) -> int:
     return sum(int(d) for d in str(n))
 
 
-def blab_fun_fact(n: int) -> str:
+@cache(expire=3600)
+async def blab_fun_fact(n: int) -> str:
     """
     I'll read you a fun fact about any number-
     -from the Numbers API book.
     """
     url = f"http://numbersapi.com/{n}/math?json"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        return data.get("text", "No fun fact available.")
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("text", "No fun fact available.")
     return "No fun fact available."
 
 
 @app.get("/api/classify-number")
+@cache(expire=3600)
 async def classify_number(number: str = Query(
     ...,
     description="The number to classify"
@@ -86,7 +98,7 @@ async def classify_number(number: str = Query(
         else:
             properties.append("even")
 
-        fun_fact = blab_fun_fact(number_int)
+        fun_fact = await blab_fun_fact(number_int)
 
         response = {
             "number": number_int,
